@@ -9,7 +9,7 @@ Para ejecutarlo:
 $npm install 
 
 En desarrollo:
-$npm devstart
+$npm run devstart
 
 En Produccion:
-$npm start
+$npm run start
