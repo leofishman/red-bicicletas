@@ -1,6 +1,6 @@
 Sistema web para ubicar bicicletas por ubicacion, modelo o color.
 
-Version 0.0.1 
+Version 0.0.2
 5 Marzo 2021
 
 Incluye ubicacion de las bicicletas en mapa y api para listar, crear o borrar bicicletas.
@@ -13,3 +13,7 @@ $npm run devstart
 
 En Produccion:
 $npm run start
+
+New to version 0.0.2
+
+Jasmin test framework
