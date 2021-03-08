@@ -13,9 +13,16 @@ var app = express();
 
 var mongoose = require('mongoose');
 
-var mongoDb = 'mongodb://localhost/red_bicicletas';
+var mongoDB = 'mongodb://localhost/red_bicicletas';
 
-mongoose.connect(mongoDb, {useNewUrlParser:true});
+mongoose.connect(mongoDB, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+  useUnifiedTopology: true,
+})
+
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDb connection error: '));
