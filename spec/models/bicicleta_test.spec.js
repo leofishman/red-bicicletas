@@ -70,9 +70,7 @@ afterAll( async (done) => {
 describe('Bicicleta.createInstance', () => {
     it('Crea instancia de bicicleta', () => {
         var bici = Bicicleta.createInstance(1, "amarillo", "urbana", [-34.1,-54.5]);
-console.log(bici)
         expect(bici.code).toBe(1);
-
     });
 });
 

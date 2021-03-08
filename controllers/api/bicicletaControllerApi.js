@@ -1,24 +1,67 @@
-var Bicicleta = require('../../models/bicicleta');
+//const _ = require('underscore')
+const Bicicleta = require('../../models/bicicleta')
 
-exports.bicicleta_list = function(req, res) {
+exports.bicicleta_list = function (req, res) {
+  Bicicleta.allBicis().exec((err, bicis) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        err,
+      });
+    }
     res.status(200).json({
-        bicicletas: Bicicleta.allBicis
-    });
+      bicicletas: bicis
+    })
+  })
+
 }
 
-exports.bicicleta_create = function(req, res){
-    var bici = new Bicicleta(req.body.id, req.body.color, req.body.modelo);
-    bici.ubicacion = [req.body.ubicacion[0], req.body.ubicacion[1]];
-    Bicicleta.add(bici);
+exports.bicicleta_create = function (req, res) {
+  let bici = new Bicicleta({
+    code: req.body.code,
+    color: req.body.color,
+    modelo: req.body.modelo,
+    ubicacion: [req.body.lat, req.body.lng]
+  });
+  Bicicleta.add(bici)
 
-    res.status(200).json({
-        bicicleta: bici
-    });
-
+  res.status(200).json({
+    bicicleta: bici
+  })
 }
 
-exports.bicicleta_delete = function(req, res){
-    Bicicleta.removeById(req.body.id);
+exports.bicicleta_delete = function (req, res) {
+  const id = req.params.id;
+  Bicicleta.findByIdAndRemove(id, (err, data) => {
+    if(err) {
+      res.status(404).json({ok:false, message:`Error no se encuentra la bicicleta con el ID: ${id}`})
+      return;
+    }
+    res.status(204).json({ok:true});
 
-    res.status(204).send();
+  })
+}
+
+exports.bicicleta_update_post = function (req, res) {
+  let body = _.pick(req.body, ['color', 'modelo', 'code'])
+  const id = req.params.id;
+  Bicicleta.findOneAndUpdate(
+    id,
+    body, {
+      new: true
+    },
+    (err, biciBD) => {
+      if (err) {
+        return res.status(404).json({
+          ok: false,
+          error: {
+            message: `No se encuentra una bicicleta con id: ${req.params.id}`,
+            err
+          }
+        })
+      }
+      return res.status(200).json({
+        bicicleta: biciBD
+      })
+    })
 }
