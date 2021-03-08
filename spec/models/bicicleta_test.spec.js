@@ -14,14 +14,14 @@ describe('Testing Bicicletas', function () {
         useCreateIndex: true,
         useFindAndModify: false,
         useUnifiedTopology: true,
-      })
+      });
   
       db = mongoose.connection;
       db.on('error', console.error.bind(console, 'connection error'));
       db.once('open', function () {
         console.log('We are connected to test database!');
         done();
-      })
+      });
     }
     beforeAll(function (done) {
       if(mongoose.connection.readyState){
@@ -30,7 +30,7 @@ describe('Testing Bicicletas', function () {
       } else {
         conectar(done);
       }
-    })
+    });
   
     afterEach(function (done) {
       Bicicleta.deleteMany({}, function (err, success) {
@@ -48,8 +48,8 @@ describe('Testing Bicicletas', function () {
         expect(bici.modelo).toBe("urbana");
         expect(bici.ubicacion[0]).toEqual(-34.5);
         expect(bici.ubicacion[1]).toEqual(-54.1);
-      })
-    })
+      });
+    });
   
   
     describe('Bicicleta.allBicis', () => {
@@ -57,9 +57,9 @@ describe('Testing Bicicletas', function () {
         Bicicleta.allBicis(function (err, bicis) {
           expect(bicis.length).toBe(0);
           done();
-        })
-      })
-    })
+        });
+      });
+    });
   
     describe('Bicicleta.add', () => {
       it('agrega solo una bici', (done) => {
@@ -70,10 +70,10 @@ describe('Testing Bicicletas', function () {
             expect(bicis.length).toEqual(1);
             expect(bicis[0].code).toEqual(aBici.code);
             done();
-          })
-        })
-      })
-    })
+          });
+        });
+      });
+    });
   
     describe('Bicicleta.findByCode', () => {
       it('debe de devolver la bici con code 1', (done) => {
@@ -91,14 +91,33 @@ describe('Testing Bicicletas', function () {
                 expect(targetBici.color).toBe(aBici.color);
                 expect(targetBici.modelo).toBe(aBici.modelo);
                 done();
-              })
-            })
-          })
+              });
+            });
+          });
+        });
+      });
+    });
+
+    describe('Bicicleta.remove', () => {
+        it('agrega solo una bici y la borra', (done) => {
+          var aBici = new Bicicleta({ code: 1, color: "verde", modelo: "urbana" });
+          Bicicleta.add(aBici, function (err, newBici) {
+            if (err) console.log(err);
+            Bicicleta.allBicis(function async (err, bicis) {
+              expect(bicis.length).toEqual(1);
+              expect(bicis[0].code).toEqual(aBici.code);
+              // Remove bici and test!
+              var a = Bicicleta.removeByCode(bicis[0].code, function async (error, targetBici) {
+                if (error) console.log('error: ', err);
+                    var a =  Bicicleta.findById(bicis[0]);
+                    Bicicleta.allBicis(function (err, bicis) {
+                        expect(bicis.length).toBe(0);
+                        done();
+                    });
+            });
+          });
+        });
+      });
+    }); 
   
-        })
-  
-      })
-    })
-  
-  
-  })
+  });
