@@ -1,4 +1,3 @@
-//const _ = require('underscore')
 const Bicicleta = require('../../models/bicicleta')
 
 exports.bicicleta_list = function (req, res) {
@@ -43,11 +42,11 @@ exports.bicicleta_delete = function (req, res) {
 }
 
 exports.bicicleta_update_post = function (req, res) {
-  let body = _.pick(req.body, ['color', 'modelo', 'code'])
+  //let body = _.pick(req.body, ['color', 'modelo', 'code'])
   const id = req.params.id;
   Bicicleta.findOneAndUpdate(
     id,
-    body, {
+    req.body, {
       new: true
     },
     (err, biciBD) => {

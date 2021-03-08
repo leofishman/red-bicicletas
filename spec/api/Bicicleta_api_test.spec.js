@@ -1,58 +1,147 @@
-/*var Bicicleta = require("../../models/bicicleta");
-var request = require('request');
-var server = require('../../bin/www');
+var mongoose = require('mongoose');
+var axios = require('axios');
+var Bicicleta = require("../../models/bicicleta");
+var server = require('../../bin/www')
+var URL = 'http://localhost:3000/api/bicicletas';
 
-//beforeEach( () => {Bicicleta.allBicis = []});
-beforeEach(()=>{console.log('testeando...')});
 
-describe('Api Bicicleta', () => {
-    describe('Get Bicicletas /', () => {
-        it('status 200', () => {
-  //          expect(Bicicleta.allBicis.length).toBe(0);
+describe('Test Bicicleta', () => {
 
-            request.get('http://localhost:3000/api/bicicletas', function(error, response, body){
-                expect(response.statusCode).toBe(200);
-            });          
+
+    let db;
+    conectar = (done) => {
+      var mongoDB = 'mongodb://localhost/bicicletasTest';
+      console.log("mongoDB: ", mongoDB)
+      mongoose.connect(mongoDB, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
+        useFindAndModify: false,
+        useUnifiedTopology: true,
+      });
+  
+      db = mongoose.connection;
+      db.on('error', console.error.bind(console, 'connection error'));
+      db.once('open', function () {
+        console.log('We are connected to test database!');
+        done();
+      });
+    ;}
+
+    beforeAll(function (done) {
+      if(mongoose.connection.readyState){
+        db = mongoose.connection;
+        done();
+      } else {
+        conectar(done);
+      }
+    });
+
+  afterEach((done) => {
+    Bicicleta.deleteMany({}, (err, success) => {
+      if (err) console.log(err);
+      done();
+    });
+  });
+
+
+  describe('GET BICICLETAS / ', () => {
+    it('Status 200', async (done) => {
+        console.log('rrrr', URL);
+      axios.get(URL, function (error, response, body) {
+
+      }).then(response => {
+         let data = response.data;
+        expect(response.status).toBe(200);
+        expect(data.bicicletas.length).toBe(0);
+        done();
+      });
+    });
+  });
+
+  describe('POST BICICLETAS /create', () => {
+    it('STATUS 200', (done) => {
+      var headersR = {
+        'Content-Type': 'application/json'
+      };
+      var aBici = {
+        "code": 10,
+        "color": "rojo",
+        "modelo": "urbana",
+        "lat": "-54.36",
+        "lng": "-74.35"
+      };
+      axios.post(URL + '/create', aBici, {
+        headers: headersR
+      })
+        .then(response => {
+          expect(response.status).toBe(200);
+          let bici = response.data.bicicleta
+          expect(bici.code).toBe(aBici.code)
+          expect(bici.color).toBe(aBici.color)
+          expect(bici.modelo).toBe(aBici.modelo)
+          expect(bici.ubicacion[0]).toBe(Number(aBici.lat))
+          expect(bici.ubicacion[1]).toBe(Number(aBici.lng))
+
+          done();
+        });
+    });
+  });
+
+  describe('PUT BICICLETAS /update', () => {
+    it('STATUS 200', (done) => {
+      var headersR = {
+        'content-type': 'application/json'
+      };
+      var bici = new Bicicleta({
+        code: 10,
+        color: "azul",
+        modelo: "urbana",
+        ubicacion: [-54.36, -74.35]
+      });
+      bici.save();
+      const id = bici.id;
+      let update = {
+        color: "azul",
+        modelo: "Deportiva"
+      }
+      axios.put(`${URL}/${id}/update`, update, {
+        headers: headersR
+      })
+        .then(response => {
+          expect(response.status).toBe(200);
+           const id = response.data.bicicleta._id
+          Bicicleta.findById(id).exec((err, biciBD) => {
+            expect(biciBD.modelo).toBe(update.modelo)
+            expect(biciBD.color).toBe(update.color)
+            done();
+          });
+        });
+    });
+  });
+
+  describe('DELETE BICICLETAS /delete', () => {
+    it('STATUS 204', (done) => {
+      var headersR = {
+        'content-type': 'application/json'
+      };
+      var aBici = {
+        "code": 10,
+        "color": "rojo",
+        "modelo": "urbana"
+      }
+      Bicicleta.add(aBici, (err, data) => {
+        axios.delete(`http://localhost:3000/api/bicicletas/${data._id}/delete`, {
+          headers: headersR
         })
+          .then(response => {
+            expect(response.status).toBe(204);
+            Bicicleta.findById(data._id).exec((err, biciBD) => {
+              expect(biciBD).toBeNull();
+              done();
+            }); 
+          });
+      });
     });
-
-    describe('Post Bicicletas ', () => {
-        it(' /create', (done) => {
-   //         expect(Bicicleta.allBicis.length).toBe(0);
-
-            var headers = {'content-type': 'application/json'};
-            var aBici = '{"id": 11, "color": "rojo", "modelo": "urbana", "ubicacion": [-34.6012424, -58.3861497]}';
-
-            request.post({
-                headers: headers,
-                url: 'http://localhost:3000/api/bicicletas/create',
-                body: aBici
-              },  function(error, response, body){
-                expect(response.statusCode).toBe(200);
-                expect(Bicicleta.findById(11).color).toBe('rojo');
-                done();
-            });          
-        });
-
-        it('delete bicicleta', (done) => {
-
-            var headers = {'content-type': 'application/json'};
-            var bici = new Bicicleta(12, 'blanca', 'montaña', [-34.596932, -58.3808287]);
-            Bicicleta.add(bici);
-
-            expect(Bicicleta.findById(12).color).toBe('blanca');
-            request.post({
-                headers: headers,
-                url: 'http://localhost:3000/api/bicicletas/delete',
-                body: '{"id": 12}'
-              },  function(error, response, body){
-                expect(response.statusCode).toBe(204);
-                expect( function(){ Bicicleta.findById(12);  } ).toThrow(new Error("No existe una bicicleta con el id 12"));
-                done();
-            });   
-            
-        });
-    });
-    
+  });
 });
-*/
