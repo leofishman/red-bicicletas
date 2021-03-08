@@ -1,7 +1,82 @@
-var Bicicleta = require('../../models/Bicicleta');
+var Bicicleta = require('../../models/bicicleta');
 var mongoose = require('mongoose');
+let server = require('../../bin/www');
 
 
+beforeAll( async (done) => {
+
+    await mongoose.connection.close();
+    await mongoose.disconnect();
+
+    var mongoDB = 'mongodb://localhost/bicicletasTest';
+
+    const db = mongoose.connection;
+
+    db.on('error', console.error.bind(console, 'connection error'));
+
+    db.once('open', () => {
+
+        console.log('We are connected to test database!');
+
+    });
+
+    mongoose.set('useFindAndModify', false);
+
+    await mongoose.connect(mongoDB, {
+
+        useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true
+
+    });
+
+    done();
+
+});
+
+
+//El siguiente afterEach elimina todos los documentos de cada modelo.
+
+afterEach( async (done) => {
+
+    try{
+
+        await Usuario.deleteMany({});
+
+        await Bicicleta.deleteMany({});
+
+        await Reserva.deleteMany({});
+
+        done();
+
+    }catch(error){console.error(error)}
+
+});
+
+
+
+afterAll( async (done) => {
+
+    try{
+
+        await mongoose.connection.close();
+
+        await mongoose.disconnect();
+
+        done();
+
+    }catch(error){console.error(error)}
+
+});
+
+describe('Bicicleta.createInstance', () => {
+    it('Crea instancia de bicicleta', () => {
+        var bici = Bicicleta.createInstance(1, "amarillo", "urbana", [-34.1,-54.5]);
+console.log(bici)
+        expect(bici.code).toBe(1);
+
+    });
+});
+
+/*
 describe('Testing Bicicletas', () => {
 
     beforeEach(function(done) {
