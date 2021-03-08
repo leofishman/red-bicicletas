@@ -1,8 +1,9 @@
-var Bicicleta = require("../../models/bicicleta");
+/*var Bicicleta = require("../../models/bicicleta");
 var request = require('request');
 var server = require('../../bin/www');
 
 //beforeEach( () => {Bicicleta.allBicis = []});
+beforeEach(()=>{console.log('testeando...')});
 
 describe('Api Bicicleta', () => {
     describe('Get Bicicletas /', () => {
@@ -54,3 +55,4 @@ describe('Api Bicicleta', () => {
     });
     
 });
+*/

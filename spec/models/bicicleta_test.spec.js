@@ -1,6 +1,48 @@
-const { allBicis } = require('../../models/Bicicleta');
 var Bicicleta = require('../../models/Bicicleta');
+var mongoose = require('mongoose');
 
+
+describe('Testing Bicicletas', () => {
+
+    beforeEach(function(done) {
+        var mongoDb = 'mongodb://localhost/testdb';
+        mongoose.connect(mongoDb, {useNewUrlParser: true});
+
+        const db = mongoose.connection;
+        db.on('error', console.error.bind(console, 'db connection error'));
+        db.once('open', function () {
+            console.log('We are connected to the database');
+            done();
+        });
+    });
+
+    afterEach(function (done) {
+        Bicicleta.deleteMany({}, function (err, success){
+            if (err) console.log(err);
+            done();
+        });
+    });
+});
+
+describe('Bicicleta.createInstance', () => {
+    it('Crea instancia de bicicleta', () => {
+        var bici = Bicicleta.createInstance(1, "amarillo", "urbana", [-34.1,-54.5]);
+console.log(bici)
+        expect(bici.code).toBe(1);
+
+    });
+});
+
+describe('Bicicleta.allBicis', () => {
+    it('Comienza vacia', (done) => {
+        Bicicleta.allBicis(function(err, bicis) {
+            expect(bicis.length).toBe(0);
+            done();
+        })
+    })
+})
+
+/*
 beforeEach( () => {Bicicleta.allBicis = []});
 
 describe('Bicicleta.allBicis', () => {
@@ -60,3 +102,5 @@ describe('Bicicle.removeById', () => {
 
     });
 });
+
+*/
