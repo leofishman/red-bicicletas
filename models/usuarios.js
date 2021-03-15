@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
-const Reserva = require('./reserva')
+const Reserva = require('./reserva');
+const uniqueValidator = require('mongoose-unique-validator');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const Schema = mongoose.Schema;
 
@@ -36,6 +39,18 @@ const usuarioSchema = new Schema({
   },
 });
 
+usuarioSchema.plugin(uniqueValidator, {message : 'El {PATH} ya existe con otro usuario'});
+
+usuarioSchema.pre('save', function(next){
+  if (this.isModified('password')){
+      this.password = bcrypt.hashSync(this.password, saltRounds);
+  }
+  next();
+});
+
+usuarioSchema.methods.validPassword = function(password){
+  return bcrypt.compareSync(password, this.password);
+};
 
 usuarioSchema.methods.reservar = function (biciId, desde, hasta, cb) {
     var reserva = new Reserva({
