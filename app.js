@@ -7,7 +7,7 @@ const passport = require('./config/passport');
 const session = require('express-session');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var usersRouter = require('./routes/usuarios');
 var bicicletasRouter = require('./routes/bicicletas');
 var bicicletasAPIRouter = require('./routes/api/bicicletas');
 var usuariosApisRouter = require('./routes/api/usuarios');
@@ -15,7 +15,7 @@ var usuariosApisRouter = require('./routes/api/usuarios');
 const store = new session.MemoryStore;
 
 var app = express();
-app.use(session.({
+app.use(session({
   cookie: { maxAge: 240 * 60 * 60 * 1000 },
   store: store,
   saveUninitialized: true,
@@ -53,8 +53,34 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+
+app.get('/login', function(req, res){
+  res.render('session/login');
+});
+
+app.post('/login', function(req,res,next){
+  passport.authenticate('local', function(err,usuario,info){
+    if(err)
+      return next(err);
+    if(!usuario)
+      return res.render('session/login', {info});
+    req.logIn(usuario, function(err){
+      if(err)
+        return next(err);
+      return res.redirect('/');
+    });
+  })(req,res,next);
+});
+
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
+});
+
+
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/usuarios', usersRouter);
 app.use('/bicicletas', bicicletasRouter);
 app.use('/api/bicicletas', bicicletasAPIRouter);
 
